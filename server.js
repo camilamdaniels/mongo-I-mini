@@ -36,6 +36,28 @@ server.post('/api/bears', (req, res) => {
 		}
 });
 
+server.put('/api/bears/:id', (req, res) => {
+	const bearInformation = req.body;
+	const id = req.params.id;
+
+	if (!bearInformation.species || !bearInformation.latinName) {
+		res.status(400).json({
+			error: 'Please provide both species and a latinName for the Bear.'
+		})
+	} else {
+		const bear = new Bear(bearInformation);
+		Bear.findByIdAndUpdate(id, bearInformation)
+			.then((newBear) => {
+				res.status(201).json(newBear);
+			})
+			.catch((error) => {
+				res.status(500).json({
+					error: 'There Bear information could not be modified.'
+				})
+			});
+		}
+});
+
 server.get('/api/bears', (req, res) => {
 	Bear.find({})
 		.then((bears) => {
@@ -52,6 +74,20 @@ server.get('/api/bears/:id', (req, res) => {
 	const { id } = req.params;
 
 	Bear.findById(id)
+		.then((bear) => {
+			res.status(200).json(bear);
+		})
+		.catch((error) => {
+			res.status(500).json({
+				error: 'The Bear could not be removed.'
+			});
+		});
+});
+
+server.delete('/api/bears/:id', (req, res) => {
+	const { id } = req.params;
+
+	Bear.findByIdAndRemove(id)
 		.then((bear) => {
 			res.status(200).json(bear);
 		})
